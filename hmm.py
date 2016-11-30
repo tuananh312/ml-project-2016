@@ -44,12 +44,6 @@ def emission_param_fixed(x,y):
     count_y = count_emission_y(y) + 1
     return count_yx / count_y
 
-def create_emission_dict(dev_in_word):
-    emission_dict = {}
-    for i in dev_in_word:
-        emission_dict[i] = get_optimal_y(i)
-    return emission_dict
-
 def get_optimal_y(x):
     emission_param_set = {}
     for y in tags_y:
@@ -57,6 +51,11 @@ def get_optimal_y(x):
     optimal_y = max(emission_param_set, key=emission_param_set.get)
     return optimal_y
 
+def create_emission_dict(dev_in_word):
+    emission_dict = {}
+    for i in dev_in_word:
+        emission_dict[i] = get_optimal_y(i)
+    return emission_dict
 
 #read training/testing data
 def readTraining(filename):
@@ -78,7 +77,7 @@ def readDevIn(filename):
     fo = open(filename, 'r')
     while True:
         line = fo.readline()
-        if line == '\n':
+        if line == '\r\n':
             continue
         elif line == '':
             break
@@ -105,7 +104,6 @@ def writePrediction(filename, result):
 words_x, tags_y = populate_word_tag_lists('/home/tuananh/Documents/ML/Project/ml-project-2016/EN/EN/train')
 dev_in_word = readDevIn('/home/tuananh/Documents/ML/Project/ml-project-2016/EN/EN/dev.in')
 emission_dict = create_emission_dict(dev_in_word)
-# prediction_dict = make_prediction(emission_dict,dev_in_word)
-# writePrediction('dev.p2.out',prediction_dict)
-print len(words_x), len(tags_y)
-print emission_dict
+writePrediction('dev.p2.out',emission_dict)
+# print dev_in_word
+
