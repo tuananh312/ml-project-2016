@@ -4,10 +4,12 @@
 # storing position word position i with tag i
 import time
 
-who_am_i = 'yuhan'
+# who_am_i = 'yuhan'
 # who_am_i = 'anh'
+who_am_i = 'anh2'
 
-directory = {'anh': '/home/tuananh/Documents/ML/Project/ml-project-2016',
+directory = {'anh2': 'D:/Project/ml-project-2016',
+             'anh': '/home/tuananh/Documents/ML/Project/ml-project-2016',
              'yuhan': '/Users/yuhan/Documents/SUTD/,Machine Learning/ML_project'}[who_am_i]
 
 language = 'EN'
@@ -195,11 +197,6 @@ class HMM(object):
         self.dev_tweets = dev_tweets
         return dev_words
 
-    # def make_prediction(training, dev_in):
-    #     prediction = {}
-    #     for i in dev_in:
-    #         prediction[i] = training[i]
-    #     return prediction
 
     def writeDict(self):
         filename = self.directory + '/dict.out'
