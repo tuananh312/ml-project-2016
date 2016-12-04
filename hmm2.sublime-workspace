@@ -1,0 +1,555 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"savgo",
+				"savgol_iterate"
+			],
+			[
+				"split",
+				"splitlines\tfunction"
+			],
+			[
+				"diff",
+				"diffData"
+			],
+			[
+				"diffda",
+				"diffData2〔variable〕"
+			],
+			[
+				"L",
+				"LEFT〔variable〕"
+			],
+			[
+				"titl",
+				"titletext"
+			],
+			[
+				"sub",
+				"subplot"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					""
+				],
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					"Run"
+				],
+				[
+					"Packages/SublimeREPL/sublimerepl_build_system_hack.sublime-build",
+					""
+				]
+			],
+			[
+				"Packages/C++/C++ Single File.sublime-build",
+				"Run"
+			]
+		],
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				],
+				[
+					"Packages/SublimeREPL/sublimerepl_build_system_hack.sublime-build",
+					""
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/R/R.sublime-build",
+					""
+				],
+				[
+					"Packages/SublimeREPL/sublimerepl_build_system_hack.sublime-build",
+					""
+				]
+			],
+			[
+				"Packages/R/R.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 267.0,
+		"last_filter": "pyth",
+		"selected_items":
+		[
+			[
+				"pyth",
+				"SublimeREPL: Python"
+			],
+			[
+				"ppyth",
+				"SublimeREPL: Python"
+			],
+			[
+				"pth",
+				"Build With: Python"
+			],
+			[
+				"ptyh",
+				"SublimeREPL: Python"
+			],
+			[
+				"disable lint",
+				"Anaconda: Disable linting on this file"
+			],
+			[
+				"anaconda ",
+				"Anaconda: Enable linting on this file"
+			],
+			[
+				"sublimelinter ",
+				"SublimeLinter: Toggle Linter"
+			],
+			[
+				"disabl",
+				"Anaconda: Disable linting on this file"
+			],
+			[
+				"enable liv",
+				"SublimeCodeIntel: Enable Live Autocompletion for Current Language"
+			],
+			[
+				"disable",
+				"SublimeCodeIntel: Disable Live Autocompletion"
+			],
+			[
+				"pytho",
+				"SublimeREPL: Python"
+			],
+			[
+				"disable l",
+				"Anaconda: Disable linting on this file"
+			],
+			[
+				"anac",
+				"Anaconda: Disable linting on this file"
+			],
+			[
+				"go to ",
+				"Anaconda: Goto Python object"
+			],
+			[
+				"g",
+				"Anaconda: Goto object definition"
+			],
+			[
+				"go",
+				"Anaconda: Goto object definition"
+			],
+			[
+				"anaconda",
+				"Anaconda: Enable linting on this file"
+			],
+			[
+				"disab",
+				"Anaconda: Disable linting on this file"
+			],
+			[
+				"remove p",
+				"Package Control: Remove Package"
+			],
+			[
+				"pep8",
+				"Anaconda: Autoformat PEP8 Errors"
+			],
+			[
+				"anaco",
+				"Anaconda: Disable linting on this file"
+			],
+			[
+				"linter",
+				"SublimeLinter: Disable Linter"
+			],
+			[
+				"sublimecod",
+				"SublimeCodeIntel: Disable Plugin"
+			],
+			[
+				"sublimelinter",
+				"SublimeLinter: Disable Linter"
+			],
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"set syntax py",
+				"Set Syntax: Python"
+			],
+			[
+				"py",
+				"SublimeREPL: Python"
+			],
+			[
+				"python",
+				"SublimeREPL: Python"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 593.0
+	},
+	"console":
+	{
+		"height": 120.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/yuhan/Desktop/kissinger.py",
+		"/Users/yuhan/Desktop/purevpn password.txt",
+		"/Users/yuhan/Desktop/josephus.py",
+		"/Users/yuhan/Documents/SUTD/,Machine Learning/HW3/hw3-q2.py",
+		"/Users/yuhan/Documents/SUTD/,Machine Learning/HW3/hw3-q3.py",
+		"/Users/yuhan/Desktop/ultimate.py",
+		"/Users/yuhan/Google Drive/UROP/aoeu.py",
+		"/Users/yuhan/Desktop/cs106.cpp",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/AutoPEP8/Default.sublime-keymap",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/SublimeREPL/config/Main.sublime-menu.template",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/SublimeREPL/config/Python/Default.sublime-commands",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/yuhan/Downloads/python_koans-master/python2/koans/about_exceptions.py",
+		"/Users/yuhan/Downloads/python_koans-master/python2/koans/about_sets.py",
+		"/Users/yuhan/Downloads/python_koans-master/python2/koans/about_true_and_false.py",
+		"/Users/yuhan/Downloads/python_koans-master/python2/koans/about_control_statements.py",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/SublimeREPL/config/Python/Main.sublime-menu",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/SublimeCodeIntel/SublimeCodeIntel.sublime-settings",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/SublimeCodeIntel/Default (OSX).sublime-keymap",
+		"/Users/yuhan/Library/Application Support/Sublime Text 3/Packages/User/SublimeCodeIntel.sublime-settings"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"'",
+			"’",
+			"totalError",
+			"theta",
+			"play",
+			"plot",
+			"draw()",
+			"datacurs",
+			"\\b",
+			"load",
+			"analysin",
+			"analys",
+			"difference",
+			"\n    ",
+			"tcfilter",
+			"ea",
+			"skip",
+			"wave",
+			"contrast",
+			"itertools",
+			"differenti",
+			"imshow",
+			"file_dir",
+			"impim",
+			"imp",
+			"savgol_filter",
+			"saveD",
+			"noise_va",
+			"savgol_iterate",
+			"analyse",
+			"Image",
+			"cv2",
+			"analysepoint",
+			"savgol_filter",
+			"analysev2",
+			"filepath",
+			"colorbar",
+			"contrastD",
+			"u'",
+			"u\"",
+			"imshow",
+			"img",
+			"pic",
+			"savgol_filter",
+			"savgol_iterate",
+			"savgol",
+			"noise_variance",
+			"noise_va",
+			"savgol_iterate",
+			"find_p",
+			"On_motion",
+			"cwt",
+			"a",
+			"cwt",
+			"ricker",
+			"find_peaks_cwt",
+			"savgol_filter",
+			"cwt",
+			"showpic",
+			"different",
+			"update",
+			"yaml",
+			"np",
+			"fn",
+			"sliceArr",
+			"expt",
+			" ",
+			"+",
+			"**2",
+			" ",
+			"twoo",
+			"maskedData",
+			"reshaped_diff",
+			"dimension",
+			"blit",
+			"self",
+			"rawData",
+			"generator",
+			"peaks",
+			"tclines",
+			"self",
+			"contrastD",
+			"222",
+			"224",
+			"restart",
+			"param",
+			"expt",
+			"set_ylim",
+			"ref_rect",
+			"tCD",
+			"ctrlfactor",
+			"bg_reference",
+			"Tkinter",
+			"matplotlib.backends.backend_tkagg.",
+			"ttk",
+			"catch_undrawn_subplot",
+			"title",
+			"self",
+			"img_shape",
+			"bIter",
+			"aIter",
+			"bg_image",
+			"prog",
+			"ctrlList",
+			"nImg",
+			"bg_image",
+			"ncdata",
+			"dataDim",
+			"crop",
+			"ramp",
+			"conf",
+			"cv2",
+			"cv2.",
+			"txt",
+			"config",
+			"txt",
+			"self.path",
+			"self.dir",
+			"file_dir",
+			"Image",
+			"fail",
+			"s",
+			"Matunas",
+			"Ramirez",
+			"__",
+			"1",
+			"0",
+			"__"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 38.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.autopep8":
+	{
+		"height": 100.0
+	},
+	"output.exec":
+	{
+		"height": 434.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "hmm2.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"testpoint",
+				"testpoint"
+			],
+			[
+				"line",
+				"draw_line"
+			],
+			[
+				"",
+				"Gui2"
+			],
+			[
+				"draw_",
+				"draw_figtext"
+			]
+		],
+		"width": 392.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 191.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -3,10 +3,11 @@
 # emission param
 # storing position word position i with tag i
 import time
+import math
 
-# who_am_i = 'yuhan'
+who_am_i = 'yuhan'
 # who_am_i = 'anh'
-who_am_i = 'anh2'
+# who_am_i = 'anh2'
 
 directory = {'anh2': 'D:/Project/ml-project-2016',
              'anh': '/home/tuananh/Documents/ML/Project/ml-project-2016',
@@ -20,11 +21,11 @@ class HMM(object):
         self.parent_dir = directory
         self.directory = directory + '/{0}/{0}'.format(language)
         self.language = language
-        self.verbose = verbose
+        self.verbose = verbose  # False, TRUE or 'extreme' (for debugging)
         self.words_x = []
         self.tags_y = []
         self.tag_set = []  # reduce tags_y to minimal set, doesn't include start and stop tags
-
+        self.word_set = set([]) # muchhhh faster way to test for inclusion, O(1) vs O(n) for list
         self.training_set = []  # tuple pairs of word / tag
         self.tag_count_dict = {}
         self.optimal_dict = {}  # previously named emission dict, gives optimal tag for each word
@@ -35,6 +36,17 @@ class HMM(object):
         self.tweets = []
         self.dev_words = []
         self.dev_tweets = []
+
+        self.short = {'__STOP__':   'S>',
+                      'B-neutral':  'B0',
+                      'B-negative': 'B-',
+                      'O':          'O ',
+                      '__START__':  'S<',
+                      'B-positive': 'B+',
+                      'I-neutral':  'I0',
+                      'I-positive': 'I+',
+                      'I-negative': 'I-'}
+
         if verbose:
             print 'Initialized HMM class with language ' + language
 
@@ -49,7 +61,7 @@ class HMM(object):
         self.readTraining(training_file)  # returns a list of lists
         for pair in self.training_set:
             if len(pair) == 2:  # ignore empty lines
-                word, tag = pair # unpack values
+                word, tag = pair  # unpack values
                 self.words_x.append(word)
                 self.tags_y.append(tag)
                 if tag not in self.tag_count_dict:
@@ -71,13 +83,13 @@ class HMM(object):
         self.tag_count_dict['__START__'] = len(self.tweets)
         self.tag_count_dict['__STOP__'] = len(self.tweets)
 
-
         self.tag_set = list(set(self.tags_y))
+        self.word_set = set(self.words_x)
         # normalize emission values to 0-1 probability
         for tag in self.emission_dict:
             for word in self.emission_dict[tag]:
                 self.emission_dict[tag][word] /= float(
-                    self.tag_count_dict[tag]+1)
+                    self.tag_count_dict[tag] + 1)
 
     def count_emission_y_to_x(self, x, y):
         count_yx = 0
@@ -92,16 +104,26 @@ class HMM(object):
         return count_yx
 
     def emission_param(self, x, y):
-        count_yx = self.count_emission_y_to_x(x, y)
+        # count_yx = self.count_emission_y_to_x(x, y)
+        count_yx = self.emission_dict[y][x]
         count_y = self.tag_count_dict[y]
         return float(count_yx) / count_y
 
     def emission_param_fixed(self, x, y):
         # modified algorithm used for test data
-        if x not in self.words_x:  # new word that wasn't in training set
-            count_yx = 1
-        else:
-            count_yx = self.count_emission_y_to_x(x, y)
+        try:
+            count_yx = self.emission_dict[y][x]
+        except:
+            if x not in self.word_set:  # new word that wasn't in training set
+                count_yx = 1
+            else:
+                count_yx = 0
+
+        # try:
+        #     count_yx = self.emission_dict[y][x]
+        # except KeyError as e:
+        #     count_yx = 0
+            # count_yx = 1
 
         count_y = self.tag_count_dict[y] + 1.0
         return float(count_yx) / count_y
@@ -197,7 +219,6 @@ class HMM(object):
         self.dev_tweets = dev_tweets
         return dev_words
 
-
     def writeDict(self):
         filename = self.directory + '/dict.out'
         fo = open(filename, 'w')
@@ -209,7 +230,7 @@ class HMM(object):
         fo.close()
 
 
-######################################################################
+#####################################################
 ########### yu han's code ###########################
 
     def writePredictionP2(self, dev_in_words=None):
@@ -217,7 +238,7 @@ class HMM(object):
             dev_in_words = self.readDevIn()
 
         if self.verbose:
-            print 'Writing output file dev.pt.out ...'
+            print 'Writing output file dev.p2.out ...'
         filename = self.directory + '/dev.p2.out'
 
         fo = open(filename, 'w')
@@ -230,6 +251,7 @@ class HMM(object):
                 fo.write(self.optimal_dict[word])
                 fo.write('\n')
         fo.close()
+
 
     def create_transition_dict(self):
         if self.verbose:
@@ -266,8 +288,10 @@ class HMM(object):
             for next_tag in self.transition_dict[tag]:
                 self.transition_dict[tag][next_tag] /= float(tag_count)
 
-    def create_emission_dict(self):
+    def transition_param(self, from_tag, to_tag):
+        return self.transition_dict[from_tag][to_tag]
 
+    def create_emission_dict(self):
         pass
 
     def writePredictionP3(self, dev_tweets=None):
@@ -275,6 +299,27 @@ class HMM(object):
             if not self.dev_tweets:
                 self.readDevIn()
             dev_tweets = self.dev_tweets
+
+
+        if self.verbose:
+            print 'Writing output file dev.p3.out ...'
+        filename = self.directory + '/dev.p3.out'
+
+        fo = open(filename, 'w')
+
+        for tweet in dev_tweets:
+            try:
+                score, pairs = self.viterbi(tweet)
+            except:
+                pairs = [(word, 'O') for word in tweet] # just for now okay
+
+            for word, tag in pairs:
+                fo.write(word)
+                fo.write(' ')
+                fo.write(tag)
+                fo.write('\r\n')
+            fo.write('\r\n')
+        fo.close()
 
     def viterbi_helper(self, sentence, k):
         # precomputes the pi function
@@ -299,19 +344,20 @@ class HMM(object):
         else:
             # recursive case oh yeah
             partial_pi_table = self.viterbi_helper(sentence, k - 1)
-            print '-------- Partial pi table ---------'
-            for l in partial_pi_table:
-                print l
-
-            prev_pi = partial_pi_table[k - 1]
-            print 'previous pi values:'
-            print prev_pi
-            word_k = sentence[k-1]  # word at position k, cos k starts from 1
-            print 'current k', k
-            print 'current word', word_k
+            prev_pi = partial_pi_table[k - 1] #[-1]
+            word_k = sentence[k - 1]  # word at position k, cos k starts from 1
+            if self.verbose == 'extreme':
+                print 'Current k', k
+                print 'Current word', word_k
+                print '-------- Partial pi table ---------'
+                self.pretty_print_pi(partial_pi_table)
+                # for l in partial_pi_table:
+                #     print l
+                # print 'previous pi values:'
+                # print prev_pi
 
             for v in tags:
-                print 'next tag: ', v
+                # print 'next tag: ', v
                 max_score = 0
                 for u in tags:
                     # print u, v, self.transition_dict[u][v]
@@ -319,72 +365,164 @@ class HMM(object):
                     # print prev_pi[u]
                     try:
                         score = prev_pi[u] * \
-                            self.transition_dict[u][v] * \
+                            self.transition_param(u, v) * \
                             self.emission_param_fixed(word_k, v)
                         # print 'hi'
-                        if score>0:
-                            print 'transition score', u, '->', v, self.transition_dict[u][v]
-                            print 'emission score', v, '->', word_k,  self.emission_param_fixed(word_k, v)
+                        if self.verbose == 'extreme' and score > 0:
+                            print 'transition score', u, '->', v, self.transition_param(u, v)
+                            print 'emission score', v, '->', word_k, self.emission_param_fixed(word_k, v)
                             print 'previous pi score:', u, prev_pi[u]
                             print 'total score', score
-                            print
+                            print '\n'
                     except KeyError as error:
-                        # key does not exist in emission dictionaries
-                        if u == '__START__':
-                            print 'wtf', v, u, word_k, error
+                        # this should not even happen
+                        print 'what error??', v, u, word_k, error
                         score = 0
-                        # print 'error:', u, v, word_k, error
 
                     if score > max_score:
-                        print 'new score for {}: {} > {}'.format(v, score, max_score)
-                        print
+                        if self.verbose == 'extreme':
+                            print 'new score for {}: {} > {}'.format(v, score, max_score)
+                            print '\n'
                         max_score = score
                 d[v] = max_score
-
-
 
             return partial_pi_table + [d]
 
     def viterbi(self, sentence):
         # implements the recursive Viterbi algorithm
-        # to return the probabiity of
+        # to return the most probable tags that generated a given sentence
         # k is the word index from 1-n
         # v is the tag
 
         if not self.emission_dict or not self.transition_dict:
             raise Exception('dictionaries not generated')
 
-        pi_table = viterbi_helper(sentence)
+        n = len(sentence)
+        pi_table = self.viterbi_helper(sentence, n)
+
+        if self.verbose:
+            print '-------- Sentence ---------'
+            print ' '.join(sentence)
+            print '-------- Pi table ---------'
+            self.pretty_print_pi(pi_table)
+
+
+        tags = self.tag_set + ['__START__', '__STOP__']
+
+        sentence_pairs = [''] * n
+        next_tag = '__STOP__'
+        total_score = 0
+
+        for i in range(n):
+            index = n - i  # this goes backward from n to 1
+            word = sentence[index - 1]
+            # initialize
+            max_score = 0
+            tag = ''
+            for v in tags:
+                score = pi_table[index][v] * self.transition_param(v, next_tag)
+                # print v, score
+                if score > max_score:
+                    tag = v
+                    max_score = score
+                    if i == 0: total_score = score
+
+            # print word, index, tag, max_score, score
+
+            next_tag = tag
+            sentence_pairs[index - 1] = (word, tag)
+
+        if self.verbose:
+            print 'Total Score: ', total_score
+            print '-------- Tagged sentence ---------'
+            a.pretty_print_sentence(sentence_pairs)
+            print '----------------------------------'
+
+
+        # return max_score, pi_table, sentence_pairs
+        return total_score, sentence_pairs
 
 
 # for key, value in a.transition_dict.iteritems():
 #     print key, value.keys()
-part2 = False
 
-part3 = False
+# try:
+#     # verify the HMM object exists, otherwise initialise it
+#     assert False
+#     assert a is not None
+# except:
+
+    def pretty_print_pi(self, tab):
+        order = {'__START__': 0,
+                 'O': 1,
+                 'B-negative': 2,
+                 'B-neutral': 3,
+                 'B-positive': 4,
+                 'I-negative': 5,
+                 'I-neutral': 6,
+                 'I-positive': 7,
+                 '__STOP__': 8}
+
+        for row in tab:
+            for pair in sorted(row.iteritems(), key = lambda a:order[a[0]]):
+                print '{}: {}\t'.format(self.short[pair[0]], self.log(pair[1])),
+            print ''
+
+    def pretty_print_sentence(self,sentence, gray = True):
+        # for word, tag in sentence:
+        #     print a.short[tag], '\t', word
+        # for word, tag in sentence:
+        print '#', ''.join([a.short[tag]+' '*(len(word)-1) for word, tag in sentence])
+
+        print '#', ' '.join([word for word, tag in sentence])
+
+    def log(self,num):
+        if num == 0:
+            return '_____'
+        else:
+            return '{:05.1f}'.format(math.log(num,10))
 
 
-try:
-    # verify the HMM object exists, otherwise initialise it
-    assert False
-    assert a is not None
-except:
-    a = HMM(directory, "EN")
+
+
+which_part = [3]
+
+
+a = HMM(directory, "EN")
 a.populate_word_tag_lists()
-# part 2
+if 2 in which_part:
+    devin = a.readDevIn()
+    a.create_optimal_dict(devin)
+    a.writePredictionP2()
 
 
-# devin = a.readDevIn()
-# a.create_optimal_dict(devin)
-# a.writePredictionP2()
+if 3 in which_part:
+    a.readDevIn()
+    a.create_transition_dict()
+    a.verbose = False
+    problem_tweets = []
+    for tweet in a.dev_tweets:
+        try:
+            score, pairs = a.viterbi(tweet)
+            # a.pretty_print_sentence(pairs)
+        except KeyboardInterrupt:
+            break
+        except:
+            print '---ERROR---'  , '\"{}\"'.format(' '.join(tweet))
+            problem_tweets += [tweet]
+
+    a.writePredictionP3()
 
 
-# part3:
 
 
-a.create_transition_dict()
-test_sentence = 'I like the candy'
-pi_list = a.viterbi_helper(test_sentence.split(' '), 3)
+# a.verbose = 'extreme'
+# tweet = problem_tweets[3]
+# score, pairs = a.viterbi(tweet)
+
+
+# test_sentence = 'I like the candy'
+# pi_list = a.viterbi_helper(test_sentence.split(' '), 4)
 
 # for l in pi_list:
 #     print l
