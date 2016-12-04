@@ -142,7 +142,7 @@ class HMM(object):
                 optimal_param = param
 
         if self.verbose == 'extreme':
-            print 'Optimal for {}: {}, score {}'.format(x, y, param)
+            print 'Optimal for {}: {}, score {}'.format(x, optimal_y, optimal_param)
 
         return optimal_y
 
@@ -292,6 +292,7 @@ class HMM(object):
         return self.transition_dict[from_tag][to_tag]
 
     def create_emission_dict(self):
+        # already created during propagating function
         pass
 
     def writePredictionP3(self, dev_tweets=None):
@@ -350,7 +351,7 @@ class HMM(object):
                 print 'Current k', k
                 print 'Current word', word_k
                 print '-------- Partial pi table ---------'
-                self.pretty_print_pi(partial_pi_table)
+                self.pretty_print_pi(partial_pi_table, sentence)
                 # for l in partial_pi_table:
                 #     print l
                 # print 'previous pi values:'
@@ -404,7 +405,7 @@ class HMM(object):
             print '-------- Sentence ---------'
             print ' '.join(sentence)
             print '-------- Pi table ---------'
-            self.pretty_print_pi(pi_table)
+            self.pretty_print_pi(pi_table, sentence)
 
 
         tags = self.tag_set + ['__START__', '__STOP__']
@@ -452,7 +453,7 @@ class HMM(object):
 #     assert a is not None
 # except:
 
-    def pretty_print_pi(self, tab):
+    def pretty_print_pi(self, tab, sentence=None):
         order = {'__START__': 0,
                  'O': 1,
                  'B-negative': 2,
@@ -462,11 +463,14 @@ class HMM(object):
                  'I-neutral': 6,
                  'I-positive': 7,
                  '__STOP__': 8}
-
-        for row in tab:
+        if not sentence:
+            sentence = ['']*len(tab)
+        sentence = ['']+sentence
+        for i, row in enumerate(tab):
             for pair in sorted(row.iteritems(), key = lambda a:order[a[0]]):
                 print '{}: {}\t'.format(self.short[pair[0]], self.log(pair[1])),
-            print ''
+
+            print sentence[i]
 
     def pretty_print_sentence(self,sentence, gray = True):
         # for word, tag in sentence:
@@ -511,14 +515,15 @@ if 3 in which_part:
             print '---ERROR---'  , '\"{}\"'.format(' '.join(tweet))
             problem_tweets += [tweet]
 
-    a.writePredictionP3()
+    # a.writePredictionP3()
 
 
 
 
-# a.verbose = 'extreme'
-# tweet = problem_tweets[3]
-# score, pairs = a.viterbi(tweet)
+a.verbose = 'extreme'
+# tweet = a.dev_tweets[4]
+tweet = problem_tweets[3]
+score, pairs = a.viterbi(tweet)
 
 
 # test_sentence = 'I like the candy'
