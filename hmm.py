@@ -3,7 +3,7 @@ import time
 import math
 import heapq
 
-who_am_i = 'anh2'
+who_am_i = 'yuhan'
 # who_am_i = 'anh'
 # who_am_i = 'anh2'
 
@@ -392,43 +392,6 @@ class HMM(object):
         # print '\n'
         return pi_table
 
-    def viterbi_part_4_helper(self, sentence):
-        tags = self.tag_set + ['__START__', '__STOP__']
-        index = 0
-        pi_table = [{}]
-        top_score_table = [{}]
-        for tag in tags:
-            pi_table[0][tag] = [1] if (tag == '__START__') else [0]
-        for k in range(len(sentence)):
-            d = {}
-            #dictionary storing previous node and the ranking index where it came from
-            top_d = {}
-            temp_pi_dict = {}
-            previous_pi = pi_table[k]
-            word_k = sentence[k]
-            for v in tags:
-                # dictionary storing score of previous node and the ranking index where it came from
-                score_dict = {}
-                top_score_dict = {}
-                for u in tags:
-                    for score in prev_pi[u]:
-                        score_dict[(u, prev_pi.index(u))] = score * self.transition_param(u, v) * self.emission_param_fixed(word_k, v)
-                # get top 5
-                top_score_keys = heapq.nlargest(5, score_dict, key=score_dict.get)
-                for key in top_score_keys:
-                    top_score_dict[key] = score_dict[key]
-
-                # store top 5 scores for forward algorithm
-                top_score_list = list(top_score_keys.values)
-                d[v] = sorted(top_score_list, reverse=True)
-
-                # store previous node + ranking index where it came from of top 5 scores.
-                top_d[v] = top_score_dict
-
-            top_score_table += [top_d]
-            pi_table += [d]
-        return pi_table, top_score_table
-
 
     def get_max_key(self, dict_of_values, num = 1):
         max_key = None
@@ -498,31 +461,103 @@ class HMM(object):
         # return max_score, pi_table, sentence_pairs
         return total_score, sentence_pairs
 
-    def viterbi_part_4(self, sentence):
-        n = len(sentence)
 
-        pi_table, top_score_table = self.viterbi_part_4_helper(sentence)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def viterbi_part_4_helper(self, sentence, num_best = 1):
         tags = self.tag_set + ['__START__', '__STOP__']
-        sentence_pairs = [''] * n
-        next_tag = '__STOP__' # backtrack from last tag
+        index = 0
+        pi_table = [{}]
+        top_score_table = [{}]
+        print sentence
 
-        for i in range(n):
-            index = n - i  # this goes backward from n to 1
-            word = sentence[index - 1]
-            # initialize
+        for tag in tags:
+            # pi_table[0][tag] = [1] if (tag == '__START__') else [0]
+            pi_table[0]['__START__'] = [(1, [])] # score, path it came from
+        for k in range(len(sentence)):
+            d = {}
+            previous_pi = pi_table[k]
+            word_k = sentence[k]
+            for tag in self.tag_set:
+                top_paths = []
+                for prev_tag in previous_pi: # all the non-zero tags in previous pi iteration
+                    prev_paths = previous_pi[prev_tag] # the k best paths
+                    for score, path in prev_paths:
+                        new_score = score * self.emission_param_fixed(word_k, tag) * self.transition_param(prev_tag, tag)
+                        new_path = path + [prev_tag]
+                        if new_score > 0:
+                            top_paths += [(new_score, new_path)]
+                top_paths.sort(key = lambda a: a[0], reverse = True)
+                top_paths = top_paths[:num_best]
+                if top_paths:
+                    d[tag] = top_paths
+            pi_table += [d]
+            # print k
+            # for row in pi_table:
+            #     print row
 
-            if index == n:
-                # get 5th best value
-                # get argument leading to 5th best value: (node, index) from top_score_table
+        return pi_table
 
-            else:
-                # get argument leading to the previous node (node, index)
+    def viterbi_part_4(self, sentence, num_best):
+        pi_table = self.viterbi_part_4_helper(sentence, num_best)
+        top_paths = []
+        for tag in pi_table[-1]:
+            for score, path in pi_table[-1][tag]:
+                new_score = score* self.transition_param(tag, '__STOP__')
+                new_path = path + [tag, '__STOP__']
+                if new_score >0:
+                    top_paths += [(new_score, new_path)]
+        top_paths.sort(key = lambda a: a[0], reverse = True)
+        top_paths = top_paths[:num_best]
+        if self.verbose:
+            for score, path in top_paths:
+                print '------ SCORE:{} -------'.format(score)
+                zipped = zip(sentence,path[1:-1])
+                self.pretty_print_tagged_sentence(zipped)
+        return top_paths
+    # def viterbi_part_4(self, sentence):
+    #     n = len(sentence)
 
-            # print word, index, tag, max_score, score
+    #     pi_table, top_score_table = self.viterbi_part_4_helper(sentence)
 
-            next_tag = tag
-            sentence_pairs[index - 1] = (word, tag)
+    #     tags = self.tag_set + ['__START__', '__STOP__']
+    #     sentence_pairs = [''] * n
+    #     next_tag = '__STOP__' # backtrack from last tag
+
+    #     for i in range(n):
+    #         index = n - i  # this goes backward from n to 1
+    #         word = sentence[index - 1]
+    #         # initialize
+
+    #         if index == n:
+    #             # get 5th best value
+    #             # get argument leading to 5th best value: (node, index) from top_score_table
+
+    #         else:
+    #             # get argument leading to the previous node (node, index)
+
+    #         # print word, index, tag, max_score, score
+
+    #         next_tag = tag
+    #         sentence_pairs[index - 1] = (word, tag)
 
 
     def pretty_print_pi(self, tab, sentence=None):
@@ -625,7 +660,7 @@ class HMM(object):
 
 
 
-which_part = [3]
+which_part = [3,4]
 
 
 a = HMM(directory, "EN")
@@ -644,10 +679,11 @@ if 3 in which_part:
     a.writePredictionP3()
 
 if 4 in which_part:
-    best_tweets = a.top(10)
-    best_tweets = [[word for tag, word in tweet] for tweet,score in best_tweets]
-    best_tweets = [' '.join(tweet[1:-1]) for tweet in best_tweets]
-    print '\n'.join(best_tweets)
+    a.viterbi_part_4(a.dev_tweets[0],3)
+    # best_tweets = a.top(10)
+    # best_tweets = [[word for tag, word in tweet] for tweet,score in best_tweets]
+    # best_tweets = [' '.join(tweet[1:-1]) for tweet in best_tweets]
+    # print '\n'.join(best_tweets)
 
 
 
