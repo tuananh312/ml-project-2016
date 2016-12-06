@@ -37,6 +37,8 @@ class HMM(object):
 
         self.problem_tweets = []
 
+        # puntuation list for part 5 improvement
+        self.punctuation_list = [',', '.', '!', ":", "?", '-', ';']
         self.short = {'__STOP__':   'S>',
                       'B-neutral':  'B0',
                       'B-negative': 'B-',
@@ -430,17 +432,21 @@ class HMM(object):
         for i in range(n):
             index = n - i  # this goes backward from n to 1
             word = sentence[index - 1]
-            # initialize
-            max_score = 0
-            tag = ''
-            for v in tags:
-                score = pi_table[index][v] * self.transition_param(v, next_tag)
-                # print v, score
-                if score > max_score:
-                    tag = v
-                    max_score = score
-                    if i == 0:
-                        total_score = score
+            # part 5 punctuation implementation
+            if word in self.punctuation_list:
+                tag = 'O'
+            else:
+                # initialize
+                max_score = 0
+                tag = ''
+                for v in tags:
+                    score = pi_table[index][v] * self.transition_param(v, next_tag)
+                    # print v, score
+                    if score > max_score:
+                        tag = v
+                        max_score = score
+                        if i == 0:
+                            total_score = score
 
             # print word, index, tag, max_score, score
 
@@ -460,26 +466,6 @@ class HMM(object):
 
         # return max_score, pi_table, sentence_pairs
         return total_score, sentence_pairs
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def viterbi_part_4_helper(self, sentence, num_best = 1):
@@ -533,31 +519,6 @@ class HMM(object):
                 zipped = zip(sentence,path[1:-1])
                 self.pretty_print_tagged_sentence(zipped)
         return top_paths
-    # def viterbi_part_4(self, sentence):
-    #     n = len(sentence)
-
-    #     pi_table, top_score_table = self.viterbi_part_4_helper(sentence)
-
-    #     tags = self.tag_set + ['__START__', '__STOP__']
-    #     sentence_pairs = [''] * n
-    #     next_tag = '__STOP__' # backtrack from last tag
-
-    #     for i in range(n):
-    #         index = n - i  # this goes backward from n to 1
-    #         word = sentence[index - 1]
-    #         # initialize
-
-    #         if index == n:
-    #             # get 5th best value
-    #             # get argument leading to 5th best value: (node, index) from top_score_table
-
-    #         else:
-    #             # get argument leading to the previous node (node, index)
-
-    #         # print word, index, tag, max_score, score
-
-    #         next_tag = tag
-    #         sentence_pairs[index - 1] = (word, tag)
 
 
     def pretty_print_pi(self, tab, sentence=None):
