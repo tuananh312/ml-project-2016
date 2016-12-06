@@ -332,72 +332,6 @@ class HMM(object):
             fo.write('\r\n')
         fo.close()
 
-    def viterbi_helper_old(self, sentence, k):
-        # precomputes the pi function
-        # recursively gets pi values for
-        # all indices from 1 to k
-        # and all tags v
-        # and returns them in a big lump
-        # avoids having to calculate same values over and over again
-        # if k < 0:
-        #     # illegal
-        #     raise Exception('something is wrong here')
-
-        tags = self.tag_set + ['__START__', '__STOP__']
-
-        d = {}
-        if k == 0:
-            # base case
-            # construct base dict
-            for tag in tags:
-                d[tag] = 1 if (tag == '__START__') else 0
-            return [d]
-        else:
-            # recursive case oh yeah
-            partial_pi_table = self.viterbi_helper(sentence, k - 1)
-            prev_pi = partial_pi_table[k - 1] #[-1]
-            word_k = sentence[k - 1]  # word at position k, cos k starts from 1
-            if self.verbose == 'extreme':
-                print 'Current k', k
-                print 'Current word', word_k
-                print '-------- Partial pi table ---------'
-                self.pretty_print_pi(partial_pi_table, sentence)
-                # for l in partial_pi_table:
-                #     print l
-                # print 'previous pi values:'
-                # print prev_pi
-
-            for v in tags:
-                # print 'next tag: ', v
-                max_score = 0
-                for u in tags:
-                    # print u, v, self.transition_dict[u][v]
-                    # print v, word_k, self.emission_dict[u][word_k]
-                    # print prev_pi[u]
-                    try:
-                        score = prev_pi[u] * \
-                            self.transition_param(u, v) * \
-                            self.emission_param_fixed(word_k, v)
-                        # print 'hi'
-                        if self.verbose == 'extreme' and score > 0:
-                            print 'transition score', u, '->', v, self.transition_param(u, v)
-                            print 'emission score', v, '->', word_k, self.emission_param_fixed(word_k, v)
-                            print 'previous pi score:', u, prev_pi[u]
-                            print 'total score', score
-                            print '\n'
-                    except KeyError as error:
-                        # this should not even happen
-                        print 'what error??', v, u, word_k, error
-                        score = 0
-
-                    if score > max_score:
-                        if self.verbose == 'extreme':
-                            print 'new score for {}: {} > {}'.format(v, score, max_score)
-                            print '\n'
-                        max_score = score
-                d[v] = max_score
-
-            return partial_pi_table + [d]
 
     def viterbi_helper(self, sentence):
         # precomputes the pi function
@@ -473,8 +407,6 @@ class HMM(object):
         #         max_key = key
         #         max_value = value
         # return max_key
-
-
 
 
 
@@ -630,7 +562,7 @@ class HMM(object):
 
 
 
-which_part = [3, 4]
+which_part = [3]
 
 
 a = HMM(directory, "EN")
