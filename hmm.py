@@ -21,7 +21,7 @@ class HMM(object):
         self.parent_dir = directory
         self.directory = directory + '/{0}/{0}'.format(language)
         self.language = language
-        self.verbose = verbose  # False, TRUE or 'extreme' (for debugging)
+        self.verbose = verbose  # False, True or 'extreme' (for debugging)
         self.words_x = []
         self.tags_y = []
         self.tag_set = []  # reduce tags_y to minimal set, doesn't include start and stop tags
@@ -36,6 +36,8 @@ class HMM(object):
         self.tweets = []
         self.dev_words = []
         self.dev_tweets = []
+
+        self.problem_tweets = []
 
         self.short = {'__STOP__':   'S>',
                       'B-neutral':  'B0',
@@ -89,7 +91,7 @@ class HMM(object):
         for tag in self.emission_dict:
             for word in self.emission_dict[tag]:
                 self.emission_dict[tag][word] /= float(
-                    self.tag_count_dict[tag] + 1)
+                    self.tag_count_dict[tag])
 
     def count_emission_y_to_x(self, x, y):
         count_yx = 0
@@ -111,13 +113,19 @@ class HMM(object):
 
     def emission_param_fixed(self, x, y):
         # modified algorithm used for test data
+        if y in ['__STOP__', '__START']:
+            return 0 # these don't emit words
         try:
             count_yx = self.emission_dict[y][x]
         except:
+            # return 1.0 / len(self.word_set)
             if x not in self.word_set:  # new word that wasn't in training set
-                count_yx = 1
-            else:
-                count_yx = 0
+                return 1.0 / len(self.word_set) * self.tag_count_dict[y]*1.0/ len(self.words_x)
+                # count_yx = 1
+            else: # word that wasn't emitted by this tag before
+                return 0
+                # return 0.001/ len(self.words_x) #* self.tag_count_dict[y] * 1.0/ len(self.words_x)
+
 
         # try:
         #     count_yx = self.emission_dict[y][x]
@@ -187,6 +195,8 @@ class HMM(object):
                 break
             else:
                 word, tag = line.replace('\r\n', '').split(' ')
+                word = self.classify_word(word)
+
                 self.training_set.append((word, tag))
                 tweet.append(tag)
         fo.close()
@@ -211,6 +221,7 @@ class HMM(object):
                 break
             else:
                 word = line.replace('\r\n', '')
+                word = self.classify_word(word)
                 dev_words.append(word)
                 tweet.append(word)
         fo.close()
@@ -280,11 +291,11 @@ class HMM(object):
                 # else:
                 self.transition_dict[tag][next_tag] += 1
 
-        counts['__STOP__'] = counts['__START__']
-        self.tag_counts = counts
+        # counts['__STOP__'] = counts['__START__']
+        # self.tag_counts = counts
 
         for tag in self.transition_dict:
-            tag_count = counts[tag]
+            tag_count = self.tag_count_dict[tag]
             for next_tag in self.transition_dict[tag]:
                 self.transition_dict[tag][next_tag] /= float(tag_count)
 
@@ -309,10 +320,9 @@ class HMM(object):
         fo = open(filename, 'w')
 
         for tweet in dev_tweets:
-            try:
-                score, pairs = self.viterbi(tweet)
-            except:
-                pairs = [(word, 'O') for word in tweet] # just for now okay
+            score, pairs = self.viterbi(tweet)
+            # except:
+            #     pairs = [(word, 'O') for word in tweet] # just for now okay
 
             for word, tag in pairs:
                 fo.write(word)
@@ -322,7 +332,7 @@ class HMM(object):
             fo.write('\r\n')
         fo.close()
 
-    def viterbi_helper(self, sentence, k):
+    def viterbi_helper_old(self, sentence, k):
         # precomputes the pi function
         # recursively gets pi values for
         # all indices from 1 to k
@@ -389,6 +399,86 @@ class HMM(object):
 
             return partial_pi_table + [d]
 
+    def viterbi_helper(self, sentence):
+        # precomputes the pi function
+        # recursively gets pi values for
+        # all indices from 1 to k
+        # and all tags v
+        # and returns them in a big lump
+        # avoids having to calculate same values over and over again
+
+        tags = self.tag_set + ['__START__', '__STOP__']
+        index = 0
+        # base case
+        # construct base dict
+        pi_table = [{}]
+        for tag in tags: # initial when k = 0
+            pi_table[0][tag] = 1 if (tag == '__START__') else 0
+
+        for k in range(len(sentence)): # goes from 0 to n - 1
+            d = {}
+            prev_pi = pi_table[k] #[-1]
+            word_k = sentence[k]  # word at position k, cos k starts from 1
+            all_empty = True
+            if self.verbose == 'extreme':
+                print 'Current k:   \t', k
+                print 'Current word:\t', word_k
+                print '-------- Partial pi table ---------'
+                self.pretty_print_pi(pi_table, sentence)
+
+
+            for v in tags:
+                max_score = 0
+                for u in tags:
+                    score = prev_pi[u] * \
+                        self.transition_param(u, v) * \
+                        self.emission_param_fixed(word_k, v)
+                    if score > 0:
+                        all_empty =  False
+                        if self.verbose == 'extreme':
+                            print 'transition score', u, '->', v, self.transition_param(u, v)
+                            print 'emission score', v, '->', word_k, self.emission_param_fixed(word_k, v)
+                            print 'previous pi score:', u, prev_pi[u]
+                            print 'total score', score
+                            print '\n'
+                    if score > max_score:
+                        max_score = score
+                        # if self.verbose == 'extreme':
+                        #     print 'new score for {}: {} > {}'.format(v, score, max_score)
+                        #     print '\n'
+                d[v] = max_score
+            if all_empty:
+                if self.verbose:
+                    print 'all empty...', '#\t'+' '.join(sentence)
+                tag, = self.get_max_key(prev_pi)
+                # emission_term_estimate =
+                d['O'] = self.transition_param(tag,'O') * 1.0/len(self.emission_dict['O']) * prev_pi[tag]
+                if sentence not in self.problem_tweets:
+                    self.problem_tweets += [sentence]
+            pi_table += [d]
+        # self.pretty_print_pi(pi_table, sentence)
+        # print '\n'
+        return pi_table
+
+    def get_max_key(self, dict_of_values, num = 1):
+        max_key = None
+        sort_list = list(dict_of_values.iteritems())
+        sort_list.sort(key = lambda a:-a[1])
+        return tuple([v[0] for v in sort_list[:num]])
+        # for key, value in dict_of_values.iteritems():
+        #     if not max_key:
+        #         max_key = key
+        #         max_value = value
+        #     elif value > max_value:
+        #         max_key = key
+        #         max_value = value
+        # return max_key
+
+
+
+
+
+
     def viterbi(self, sentence):
         # implements the recursive Viterbi algorithm
         # to return the most probable tags that generated a given sentence
@@ -399,19 +489,11 @@ class HMM(object):
             raise Exception('dictionaries not generated')
 
         n = len(sentence)
-        pi_table = self.viterbi_helper(sentence, n)
-
-        if self.verbose:
-            print '-------- Sentence ---------'
-            print ' '.join(sentence)
-            print '-------- Pi table ---------'
-            self.pretty_print_pi(pi_table, sentence)
-
+        pi_table = self.viterbi_helper(sentence)
 
         tags = self.tag_set + ['__START__', '__STOP__']
-
         sentence_pairs = [''] * n
-        next_tag = '__STOP__'
+        next_tag = '__STOP__' # backtrack from last tag
         total_score = 0
 
         for i in range(n):
@@ -426,32 +508,27 @@ class HMM(object):
                 if score > max_score:
                     tag = v
                     max_score = score
-                    if i == 0: total_score = score
+                    if i == 0:
+                        total_score = score
 
             # print word, index, tag, max_score, score
 
             next_tag = tag
             sentence_pairs[index - 1] = (word, tag)
 
-        if self.verbose:
+        if self.verbose == 'debug':
+            print '-------- Sentence ---------'
+            print ' '.join(sentence)
+            print '-------- Pi table ---------'
+            self.pretty_print_pi(pi_table, sentence)
             print 'Total Score: ', total_score
             print '-------- Tagged sentence ---------'
-            a.pretty_print_sentence(sentence_pairs)
+            self.pretty_print_tagged_sentence(sentence_pairs)
             print '----------------------------------'
 
 
         # return max_score, pi_table, sentence_pairs
         return total_score, sentence_pairs
-
-
-# for key, value in a.transition_dict.iteritems():
-#     print key, value.keys()
-
-# try:
-#     # verify the HMM object exists, otherwise initialise it
-#     assert False
-#     assert a is not None
-# except:
 
     def pretty_print_pi(self, tab, sentence=None):
         order = {'__START__': 0,
@@ -468,28 +545,92 @@ class HMM(object):
         sentence = ['']+sentence
         for i, row in enumerate(tab):
             for pair in sorted(row.iteritems(), key = lambda a:order[a[0]]):
-                print '{}: {}\t'.format(self.short[pair[0]], self.log(pair[1])),
+                print '{}: {}\t'.format(self.short[pair[0]], self.print_log(pair[1])),
 
             print sentence[i]
 
-    def pretty_print_sentence(self,sentence, gray = True):
+    def pretty_print_tagged_sentence(self,sentence, gray = True):
         # for word, tag in sentence:
         #     print a.short[tag], '\t', word
         # for word, tag in sentence:
-        print '#', ''.join([a.short[tag]+' '*(len(word)-1) for word, tag in sentence])
+        print '#\t', ''.join([a.short[tag]+' '*(len(word)-1) for word, tag in sentence])
 
-        print '#', ' '.join([word for word, tag in sentence])
+        print '#\t', ' '.join([word for word, tag in sentence])
 
-    def log(self,num):
+    def print_log(self,num):
         if num == 0:
             return '_____'
         else:
             return '{:05.1f}'.format(math.log(num,10))
 
+    def classify_word(self,word):
+        # if word[0] == '#':
+        #     return "__HASHTAG__"
+        # if word[0] == '@':
+        #     return "__USERNAME__"
+        if word[0] in "#@":
+            return word.lower() # twitter usernames and hashtags are case insensitive
+        if 'http://' in word:
+            # print word
+            pass
+            # return "__{}__".format(word.split('/')[2]) # strip to domain name
+        # else:
+        return word
+
+    def top(self, k):
+        sentence_open = [([('__START__', 'None')], 1)]
+        k_open = k
+        # sentence_open = sentences
+        # return sentences
+        tags = self.tag_set# + ['__STOP__']
+        result = []
+        while k_open > 0:
+            # next_sentence = sentence_open # tuples of sentence list, score
+            next_sentence = []
+            for sentence, prev_pi in sentence_open:
+                prev_tag = sentence[-1][0]
+                for tag in tags:
+                    # num = k_open
+
+                    best_words = self.get_max_key(self.emission_dict[tag], k_open)
+                    # print tag, best_words
+                    for word in best_words:
+                        sentence_candidate = sentence+[(tag, word)]
+                        sentence_pi = prev_pi * self.transition_param(prev_tag, tag) * self.emission_param_fixed(word, tag)
+                        next_sentence += [(sentence_candidate, sentence_pi)]
+                stop_pi = prev_pi*self.transition_param(prev_tag, '__STOP__')
+                next_sentence += [(sentence+[('__STOP__', None)], stop_pi)]
+            # next_sentence += sentence_open # include existing sentences
+            # print next_sentence
+            # time.sleep(2)
+            next_sentence.sort(key= lambda a:-a[1])
+            next_sentence = next_sentence[:k_open] # trim to k-open top best sentences
+            sentence_open = []
+            for sentence, score in next_sentence:
+                if sentence[-1][0] == '__STOP__':
+                    result += [(sentence, score)]
+                    k_open -= 1
+                else:
+                    sentence_open += [(sentence, score)]
+            # print len(sentence_open)
+            # for sentence, score in sentence_open:
+            #     print score,'\t', ' '.join([tup[1] for tup in sentence])
+            # time.sleep(1)
+        return result
 
 
 
-which_part = [3]
+
+
+
+
+
+
+
+
+
+
+which_part = [3, 4]
 
 
 a = HMM(directory, "EN")
@@ -502,28 +643,36 @@ if 2 in which_part:
 
 if 3 in which_part:
     a.readDevIn()
+    a.create_emission_dict()
     a.create_transition_dict()
-    a.verbose = False
-    problem_tweets = []
-    for tweet in a.dev_tweets:
-        try:
-            score, pairs = a.viterbi(tweet)
-            # a.pretty_print_sentence(pairs)
-        except KeyboardInterrupt:
-            break
-        except:
-            print '---ERROR---'  , '\"{}\"'.format(' '.join(tweet))
-            problem_tweets += [tweet]
 
-    # a.writePredictionP3()
+    a.writePredictionP3()
+
+if 4 in which_part:
+    best_tweets = a.top(10)
+    best_tweets = [[word for tag, word in tweet] for tweet,score in best_tweets]
+    best_tweets = [' '.join(tweet[1:-1]) for tweet in best_tweets]
+    print '\n'.join(best_tweets)
 
 
 
+if 'debug' in which_part:
 
-a.verbose = 'extreme'
-# tweet = a.dev_tweets[4]
-tweet = problem_tweets[3]
-score, pairs = a.viterbi(tweet)
+    def has_link(tweet):
+        for word in tweet:
+            if '__' in word:
+                return True
+        return False
+    print '#\t' + '\n#\t'.join([' '.join(tweet) for tweet in a.dev_tweets if has_link(tweet)])
+
+    a.verbose = 'debug'
+    tweet = a.dev_tweets[4]
+    # tweet = problem_tweets[3]
+    score, pairs = a.viterbi(tweet)
+
+    for tweet in a.dev_tweets[:10]:
+        a.viterbi(tweet)
+
 
 
 # test_sentence = 'I like the candy'
