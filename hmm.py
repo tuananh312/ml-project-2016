@@ -1,15 +1,13 @@
 
-# part 2
-# emission param
-# storing position word position i with tag i
 import time
 import math
+import heapq
 
-who_am_i = 'yuhan'
+who_am_i = 'anh2'
 # who_am_i = 'anh'
 # who_am_i = 'anh2'
 
-directory = {'anh2': 'D:/Project/ml-project-2016',
+directory = {'anh2': 'D:/Project/ml-project-2016/EN/EN',
              'anh': '/home/tuananh/Documents/ML/Project/ml-project-2016',
              'yuhan': '/Users/yuhan/Documents/SUTD/,Machine Learning/ML_project'}[who_am_i]
 
@@ -394,6 +392,44 @@ class HMM(object):
         # print '\n'
         return pi_table
 
+    def viterbi_part_4_helper(self, sentence):
+        tags = self.tag_set + ['__START__', '__STOP__']
+        index = 0
+        pi_table = [{}]
+        top_score_table = [{}]
+        for tag in tags:
+            pi_table[0][tag] = [1] if (tag == '__START__') else [0]
+        for k in range(len(sentence)):
+            d = {}
+            #dictionary storing previous node and the ranking index where it came from
+            top_d = {}
+            temp_pi_dict = {}
+            previous_pi = pi_table[k]
+            word_k = sentence[k]
+            for v in tags:
+                # dictionary storing score of previous node and the ranking index where it came from
+                score_dict = {}
+                top_score_dict = {}
+                for u in tags:
+                    for score in prev_pi[u]:
+                        score_dict[(u, prev_pi.index(u))] = score * self.transition_param(u, v) * self.emission_param_fixed(word_k, v)
+                # get top 5
+                top_score_keys = heapq.nlargest(5, score_dict, key=score_dict.get)
+                for key in top_score_keys:
+                    top_score_dict[key] = score_dict[key]
+
+                # store top 5 scores for forward algorithm
+                top_score_list = list(top_score_keys.values)
+                d[v] = sorted(top_score_list, reverse=True)
+
+                # store previous node + ranking index where it came from of top 5 scores.
+                top_d[v] = top_score_dict
+
+            top_score_table += [top_d]
+            pi_table += [d]
+        return pi_table, top_score_table
+
+
     def get_max_key(self, dict_of_values, num = 1):
         max_key = None
         sort_list = list(dict_of_values.iteritems())
@@ -461,6 +497,33 @@ class HMM(object):
 
         # return max_score, pi_table, sentence_pairs
         return total_score, sentence_pairs
+
+    def viterbi_part_4(self, sentence):
+        n = len(sentence)
+
+        pi_table, top_score_table = self.viterbi_part_4_helper(sentence)
+
+        tags = self.tag_set + ['__START__', '__STOP__']
+        sentence_pairs = [''] * n
+        next_tag = '__STOP__' # backtrack from last tag
+
+        for i in range(n):
+            index = n - i  # this goes backward from n to 1
+            word = sentence[index - 1]
+            # initialize
+
+            if index == n:
+                # get 5th best value
+                # get argument leading to 5th best value: (node, index) from top_score_table
+
+            else:
+                # get argument leading to the previous node (node, index)
+
+            # print word, index, tag, max_score, score
+
+            next_tag = tag
+            sentence_pairs[index - 1] = (word, tag)
+
 
     def pretty_print_pi(self, tab, sentence=None):
         order = {'__START__': 0,
